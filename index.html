@@ -1,0 +1,2183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Third Places — spots to work outside the house</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,700;1,400&family=Courier+Prime:wght@400;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root{
+    --paper:#e8e3d5;
+    --card:#fbfaf4;
+    --card-edge:#e0dac6;
+    --ink:#232821;
+    --ink-soft:#5c5f4f;
+    --accent:#2f4b3c;
+    --accent-soft:#e3ebe4;
+    --stamp:#a8611f;
+    --stamp-bg:#f3e6d3;
+    --loud:#9c4630;
+    --line:#cdc6ae;
+    --focus:#3a6e56;
+    --radius:3px;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(35,40,33,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{ color:inherit; }
+
+  ::selection{ background:var(--accent); color:var(--card); }
+
+  :focus-visible{
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 28px 80px;
+  }
+
+  header.hero{
+    padding:56px 0 28px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:28px;
+  }
+
+  .eyebrow{
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin:0 0 10px;
+  }
+
+  h1{
+    font-family:'Newsreader', serif;
+    font-weight:400;
+    font-size:clamp(44px, 7vw, 72px);
+    line-height:0.96;
+    margin:0 0 14px;
+    letter-spacing:-0.01em;
+  }
+
+  h1 em{
+    font-style:italic;
+    font-weight:400;
+    color:var(--accent);
+  }
+
+  .tagline{
+    max-width:520px;
+    color:var(--ink-soft);
+    font-size:16px;
+    line-height:1.55;
+    margin:0;
+  }
+
+  .count-badge{
+    font-family:'Courier Prime', monospace;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:20px;
+  }
+
+  /* search + controls */
+  .controls{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    margin-bottom:28px;
+  }
+
+  .search-row{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+
+  .search-box{
+    flex:1;
+    position:relative;
+  }
+
+  .search-box svg{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    width:16px;
+    height:16px;
+    stroke:var(--ink-soft);
+    pointer-events:none;
+  }
+
+  .search-box input{
+    width:100%;
+    padding:13px 14px 13px 40px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--card);
+    font-family:'Work Sans', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+  }
+
+  .search-box input::placeholder{ color:#9b9683; }
+
+  select#sort{
+    padding:13px 34px 13px 14px;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:var(--card);
+    font-family:'Courier Prime', monospace;
+    font-size:13px;
+    color:var(--ink);
+    appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%235c5f4f'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    cursor:pointer;
+  }
+
+  .filter-panel{
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    background:rgba(251,250,244,0.6);
+    padding:18px 20px;
+  }
+
+  .filter-group{
+    margin-bottom:14px;
+  }
+  .filter-group:last-child{ margin-bottom:0; }
+
+  .filter-label{
+    font-family:'Courier Prime', monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    display:block;
+    margin-bottom:8px;
+  }
+
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:7px;
+  }
+
+  .chip{
+    font-family:'Work Sans', sans-serif;
+    font-size:13px;
+    padding:6px 12px;
+    border:1px solid var(--line);
+    border-radius:100px;
+    background:var(--card);
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    user-select:none;
+  }
+  .chip:hover{ border-color:var(--accent); color:var(--ink); }
+  .chip.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+
+  .filter-footer{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:16px;
+    padding-top:14px;
+    border-top:1px dashed var(--line);
+  }
+
+  .results-line{
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+
+  .clear-btn{
+    font-family:'Courier Prime', monospace;
+    font-size:12px;
+    background:none;
+    border:none;
+    color:var(--accent);
+    cursor:pointer;
+    text-decoration:underline;
+    text-underline-offset:3px;
+    padding:0;
+  }
+  .clear-btn:hover{ color:var(--stamp); }
+
+  /* grid */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+    gap:20px;
+    margin-top:28px;
+  }
+
+  .card{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--card-edge);
+    border-radius:var(--radius);
+    padding:22px 20px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    transition:transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 24px -14px rgba(35,40,33,0.35);
+  }
+
+  .card-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+  }
+
+  .title-block{
+    min-width:0;
+  }
+
+  .stamp{
+    flex:0 0 auto;
+    transform:rotate(3deg);
+    border:1.5px dashed var(--stamp);
+    color:var(--stamp);
+    background:var(--stamp-bg);
+    font-family:'Courier Prime', monospace;
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:0.03em;
+    padding:6px 9px;
+    border-radius:2px;
+    line-height:1.4;
+    text-align:center;
+    max-width:130px;
+  }
+  .stamp-rating{ white-space:nowrap; }
+  .stamp-vibe{
+    margin-top:4px;
+    padding-top:4px;
+    border-top:1px dashed var(--stamp);
+    font-style:italic;
+    font-size:10.5px;
+    line-height:1.35;
+    white-space:normal;
+  }
+
+  .card-type{
+    font-family:'Courier Prime', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    margin-bottom:5px;
+  }
+
+  .card h3{
+    font-family:'Newsreader', serif;
+    font-weight:700;
+    font-size:24px;
+    line-height:1.15;
+    margin:0;
+  }
+
+  .card .address{
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.45;
+    margin:0;
+  }
+
+  .neigh-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin:2px 0 4px;
+  }
+  .neigh-tag{
+    font-family:'Courier Prime', monospace;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    background:var(--accent-soft);
+    padding:2px 7px;
+    border-radius:100px;
+  }
+  .neigh-tag.tag-loud{ color:var(--loud); }
+
+  .facts{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px 12px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:4px;
+    padding-top:10px;
+    border-top:1px solid var(--line);
+  }
+  .facts div{ display:flex; gap:5px; }
+  .facts b{ color:var(--ink); font-weight:600; }
+  .facts .loud b{ color:var(--loud); }
+
+  .hours-line{
+    font-family:'Courier Prime', monospace;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  .status-tag{
+    font-family:'Work Sans', sans-serif;
+    font-size:11px;
+    font-weight:600;
+    padding:2px 8px;
+    border-radius:100px;
+  }
+  .status-open{ background:var(--accent-soft); color:var(--accent); }
+  .status-closed{ background:#f1e4de; color:var(--loud); }
+
+  .tier-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px 16px;
+    margin-top:2px;
+    padding-top:10px;
+    border-top:1px solid var(--line);
+  }
+
+  .notes{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    background:var(--accent-soft);
+    border-radius:2px;
+    padding:8px 10px;
+    line-height:1.5;
+    margin-top:2px;
+  }
+
+  .map-wrap{
+    border:1px solid var(--card-edge);
+    border-radius:var(--radius);
+    overflow:hidden;
+    margin-top:28px;
+    height:420px;
+  }
+  #map{ height:100%; width:100%; background:var(--card); }
+  .leaflet-popup-content-wrapper{
+    background:var(--card);
+    color:var(--ink);
+    border-radius:2px;
+    font-family:'Work Sans', sans-serif;
+  }
+  .leaflet-popup-content{ margin:12px 14px; font-size:13px; }
+  .map-popup-name{
+    font-family:'Newsreader', serif;
+    font-size:18px;
+    margin:0 0 2px;
+  }
+  .map-popup-address{ color:var(--ink-soft); font-size:12px; margin:0 0 6px; }
+  .map-popup-tags{ display:flex; gap:5px; flex-wrap:wrap; }
+
+  .empty-state{
+    text-align:center;
+    padding:80px 20px;
+    color:var(--ink-soft);
+  }
+  .empty-state h2{
+    font-family:'Newsreader', serif;
+    font-weight:400;
+    font-style:italic;
+    color:var(--ink);
+    margin:0 0 8px;
+  }
+
+  footer{
+    margin-top:60px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    font-family:'Courier Prime', monospace;
+    font-size:11px;
+    color:var(--ink-soft);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+
+  @media (max-width: 560px){
+    .wrap{ padding:0 16px 60px; }
+    header.hero{ padding:36px 0 24px; }
+    .facts{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="eyebrow">Field guide — Minneapolis / St. Paul</p>
+    <h1>Third <em>Places</em></h1>
+    <p class="tagline">Spots to work outside the home.</p>
+    <p class="count-badge" id="countBadge"></p>
+  </header>
+
+  <div class="controls">
+    <div class="search-row">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" placeholder="Search by name, address, neighborhood, notes…">
+      </div>
+      <select id="sort">
+        <option value="name">Sort: Name A–Z</option>
+        <option value="rating">Sort: Rating (high–low)</option>
+        <option value="price">Sort: Price (low–high)</option>
+      </select>
+    </div>
+
+    <div class="filter-panel">
+      <div class="filter-group">
+        <span class="filter-label">Hours</span>
+        <div class="chip-row" id="filterHours"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Preset filters</span>
+        <div class="chip-row" id="filterPresets"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Type</span>
+        <div class="chip-row" id="filterType"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Neighborhood</span>
+        <div class="chip-row" id="filterNeighborhood"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Price</span>
+        <div class="chip-row" id="filterPrice"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Noise</span>
+        <div class="chip-row" id="filterNoise"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Seating space</span>
+        <div class="chip-row" id="filterSpace"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Amenities</span>
+        <div class="chip-row" id="filterAmenities"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Rating</span>
+        <div class="chip-row" id="filterRating"></div>
+      </div>
+
+      <div class="filter-footer">
+        <span class="results-line" id="resultsLine"></span>
+        <button class="clear-btn" id="clearBtn">Clear all filters</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="map-wrap"><div id="map"></div></div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <h2>Nothing matches yet</h2>
+    <p>Try loosening a filter or clearing your search.</p>
+  </div>
+
+  <footer>
+    <span>third-places — personal working-spot log</span>
+    <span id="totalCount"></span>
+  </footer>
+
+</div>
+
+<script>
+const DATA = [
+  {
+    "name": "Arvonne Fraser Library",
+    "address": "1222 4th St SE, Minneapolis, MN 55414",
+    "lat": 44.9810451,
+    "lng": -93.2376784,
+    "neighborhoods": [
+      "Campus",
+      "Marcy Holmes",
+      "Northeast"
+    ],
+    "type": "Library",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "N/A",
+    "bikeRacks": "",
+    "parking": "Difficult",
+    "parkingTags": [
+      "Difficult"
+    ],
+    "outdoorSeating": "No",
+    "hours": "9a-5p MWF, 12p-8p TuTh",
+    "vibe": "Retro",
+    "space": "Medium",
+    "noise": "Quiet",
+    "price": "Free",
+    "ratingText": "4 stars out of 5",
+    "ratingNum": 4,
+    "notes": ""
+  },
+  {
+    "name": "Arya",
+    "address": "4603 Minnehaha Ave, Minneapolis, MN 55406",
+    "lat": 44.9193045,
+    "lng": -93.2142068,
+    "neighborhoods": [
+      "Minnehaha",
+      "Hiawatha",
+      "South Minneapolis",
+      "Southeast"
+    ],
+    "type": "Cafe",
+    "food": "",
+    "wifi": "",
+    "beverages": "Decent",
+    "bikeRacks": "Yes",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "No",
+    "hours": "7a-2p",
+    "vibe": "Aqueous",
+    "space": "Plenty",
+    "noise": "Low",
+    "price": "Cheap",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Augsburg Park Library",
+    "address": "7100 Nicollet Ave, Richfield, MN 55423",
+    "lat": 44.873984,
+    "lng": -93.2788069,
+    "neighborhoods": [
+      "Richfield"
+    ],
+    "type": "Library",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "N/A",
+    "bikeRacks": "",
+    "parking": "Free + on-site + EV charging",
+    "parkingTags": [
+      "Free",
+      "On-site",
+      "EV charging"
+    ],
+    "outdoorSeating": "No",
+    "hours": "12p-8p on MTuW, 9a-5p on ThF",
+    "vibe": "Reserved",
+    "space": "Medium",
+    "noise": "Quiet",
+    "price": "Free",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": ""
+  },
+  {
+    "name": "Bob's Java Hut",
+    "address": "2651 Lyndale Ave S, Minneapolis, MN 55408",
+    "lat": 44.95386999999999,
+    "lng": -93.287774,
+    "neighborhoods": [
+      "Uptown",
+      "Whittier",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "Limited",
+    "wifi": "",
+    "beverages": "Good",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "7a-5p",
+    "vibe": "",
+    "space": "Plenty",
+    "noise": "Low",
+    "price": "Cheap",
+    "ratingText": "4 stars out of 5",
+    "ratingNum": 4,
+    "notes": "Tea served in such a way that it always makes a mess."
+  },
+  {
+    "name": "Càphin Linden Hills",
+    "address": "4503 France Ave S, Minneapolis, MN 55410",
+    "lat": 44.9214,
+    "lng": -93.3311,
+    "neighborhoods": [
+      "Linden Hills",
+      "Edina",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "Limited, mostly sweets",
+    "wifi": "Yes",
+    "beverages": "",
+    "bikeRacks": "",
+    "parking": "Free + on-site",
+    "parkingTags": [
+      "Free",
+      "On-site"
+    ],
+    "outdoorSeating": "No",
+    "hours": "7a-3p",
+    "vibe": "Instagrammable",
+    "space": "Limited",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": ""
+  },
+  {
+    "name": "Cheba Hut",
+    "address": "1118 W Lake St, Minneapolis, MN 55408",
+    "lat": 44.9483,
+    "lng": -93.2958,
+    "neighborhoods": [
+      "Uptown",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Restaurant",
+    "food": "Yes",
+    "wifi": "Yes",
+    "beverages": "Limited",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "10:30a-midnight",
+    "vibe": "Bizarro",
+    "space": "Medium",
+    "noise": "Loud",
+    "price": "Medium",
+    "ratingText": "2 stars out of 5",
+    "ratingNum": 2,
+    "notes": ""
+  },
+  {
+    "name": "Coco Downtown",
+    "address": "400 S 4th St Ste 401, Minneapolis, MN 55415",
+    "lat": 44.9776194,
+    "lng": -93.2636967,
+    "neighborhoods": [
+      "Downtown"
+    ],
+    "type": "Coworking space",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "Bad",
+    "bikeRacks": "",
+    "parking": "",
+    "parkingTags": [],
+    "outdoorSeating": "No",
+    "hours": "24/7",
+    "vibe": "Varied",
+    "space": "Plenty",
+    "noise": "Low",
+    "price": "Free",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": "Gym on-site, perhaps bike storage too. Meeting pod rooms are quite cold."
+  },
+  {
+    "name": "Dogwood East Lake",
+    "address": "4021 E Lake St, Minneapolis, MN 55406",
+    "lat": 44.9481695,
+    "lng": -93.2143652,
+    "neighborhoods": [
+      "East Lake",
+      "Hiawatha",
+      "South Minneapolis",
+      "Southeast"
+    ],
+    "type": "Cafe",
+    "food": "Some",
+    "wifi": "Yes",
+    "beverages": "Decent",
+    "bikeRacks": "",
+    "parking": "Free + close",
+    "parkingTags": [
+      "Free",
+      "Close"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "7a-7p",
+    "vibe": "Summery",
+    "space": "Medium",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "5 stars out of 5",
+    "ratingNum": 5,
+    "notes": ""
+  },
+  {
+    "name": "Duck Duck",
+    "address": "1830 E 38th St, Minneapolis, MN 55407",
+    "lat": 44.9342292,
+    "lng": -93.2469635,
+    "neighborhoods": [
+      "Hiawatha",
+      "Standish",
+      "South Minneapolis",
+      "Southeast"
+    ],
+    "type": "Cafe",
+    "food": "Limited",
+    "wifi": "Yes",
+    "beverages": "Good",
+    "bikeRacks": "",
+    "parking": "Free + close",
+    "parkingTags": [
+      "Free",
+      "Close"
+    ],
+    "outdoorSeating": "No",
+    "hours": "Closed Tuesday, open 7a-5p all other weekdays",
+    "vibe": "Queer",
+    "space": "Medium",
+    "noise": "Medium",
+    "price": "Cheap",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": ""
+  },
+  {
+    "name": "Due Focacceria",
+    "address": "475 Fairview Ave S, St Paul, MN 55105",
+    "lat": 44.9273095,
+    "lng": -93.1775085,
+    "neighborhoods": [
+      "St. Paul"
+    ],
+    "type": "Restaurant + cafe",
+    "food": "Yes",
+    "wifi": "Yes; password is \"prosciutto\"",
+    "beverages": "Good",
+    "bikeRacks": "Yes",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "11a-9p",
+    "vibe": "Los Angelean",
+    "space": "Medium",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Easy Day Cafe",
+    "address": "4161 Grand Ave S, Minneapolis, MN 55409",
+    "lat": 44.9270067,
+    "lng": -93.284183,
+    "neighborhoods": [
+      "Kingfield",
+      "Uptownish",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "Yes",
+    "wifi": "Often doesn't work",
+    "beverages": "",
+    "bikeRacks": "",
+    "parking": "Free + close",
+    "parkingTags": [
+      "Free",
+      "Close"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "6a-4p",
+    "vibe": "Neighborly",
+    "space": "Plenty",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "2 stars out of 5",
+    "ratingNum": 2,
+    "notes": "Food is good, but wifi often doesn't work."
+  },
+  {
+    "name": "Edina Library",
+    "address": "5280 Grandview Square, Edina, MN 55436",
+    "lat": 44.9079965,
+    "lng": -93.3557527,
+    "neighborhoods": [
+      "Edina"
+    ],
+    "type": "Library",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "N/A",
+    "bikeRacks": "",
+    "parking": "Free + on-site",
+    "parkingTags": [
+      "Free",
+      "On-site"
+    ],
+    "outdoorSeating": "No",
+    "hours": "12p-8p MTuW, 9a-5p ThF",
+    "vibe": "Stately",
+    "space": "Plenty",
+    "noise": "Quiet",
+    "price": "Free",
+    "ratingText": "4 stars out of 5",
+    "ratingNum": 4,
+    "notes": ""
+  },
+  {
+    "name": "Falls Coffee",
+    "address": "4757 Hiawatha Ave, Minneapolis, MN 55406",
+    "lat": 44.9168352,
+    "lng": -93.2146976,
+    "neighborhoods": [
+      "Minnehaha",
+      "Hiawatha",
+      "South Minneapolis",
+      "Southeast"
+    ],
+    "type": "Cafe",
+    "food": "",
+    "wifi": "",
+    "beverages": "Good",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "6:30a-5p",
+    "vibe": "",
+    "space": "Limited",
+    "noise": "",
+    "price": "",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Finnish Bistro",
+    "address": "2264 Como Ave, St Paul, MN 55108",
+    "lat": 44.981516,
+    "lng": -93.195074,
+    "neighborhoods": [
+      "St. Paul"
+    ],
+    "type": "Restaurant + cafe",
+    "food": "Yes",
+    "wifi": "",
+    "beverages": "",
+    "bikeRacks": "",
+    "parking": "",
+    "parkingTags": [],
+    "outdoorSeating": "",
+    "hours": "6:30a-8:30p",
+    "vibe": "Tony",
+    "space": "Medium",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "4 stars out of 5",
+    "ratingNum": 4,
+    "notes": ""
+  },
+  {
+    "name": "Five Watt Kingfield",
+    "address": "3745 Nicollet Ave, Minneapolis, MN 55409",
+    "lat": 44.9344,
+    "lng": -93.2773,
+    "neighborhoods": [
+      "Kingfield",
+      "Uptownish",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "Some",
+    "wifi": "",
+    "beverages": "Limited",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "",
+    "hours": "6:30a-6p",
+    "vibe": "Electric",
+    "space": "Medium",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Five Watt Lyndale",
+    "address": "3350 Lyndale Ave S, Minneapolis, MN 55408",
+    "lat": 44.9414582,
+    "lng": -93.2885592,
+    "neighborhoods": [
+      "South Uptown",
+      "Uptownish",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "Some",
+    "wifi": "",
+    "beverages": "Limited",
+    "bikeRacks": "",
+    "parking": "Free + close",
+    "parkingTags": [
+      "Free",
+      "Close"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "6:30a-6p",
+    "vibe": "Sanitary",
+    "space": "Plenty",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "2 stars out of 5",
+    "ratingNum": 2,
+    "notes": ""
+  },
+  {
+    "name": "Gigi's Cafe",
+    "address": "824 W 36th St, Minneapolis, MN 55408",
+    "lat": 44.9367,
+    "lng": -93.2917,
+    "neighborhoods": [
+      "Uptown",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Restaurant + cafe",
+    "food": "Yes",
+    "wifi": "",
+    "beverages": "",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "7a-4p",
+    "vibe": "",
+    "space": "",
+    "noise": "",
+    "price": "",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Linden Hills Library",
+    "address": "2900 W 43rd St, Minneapolis, MN 55410",
+    "lat": 44.925014,
+    "lng": -93.316474,
+    "neighborhoods": [
+      "Linden Hills",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Library",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "N/A",
+    "bikeRacks": "",
+    "parking": "",
+    "parkingTags": [],
+    "outdoorSeating": "",
+    "hours": "9a-5p MWF, 12p-8p TuTh",
+    "vibe": "",
+    "space": "Plenty",
+    "noise": "Quiet",
+    "price": "Free",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Malcolm Yards",
+    "address": "501 30th Ave SE, Minneapolis, MN 55414",
+    "lat": 44.972763,
+    "lng": -93.2134017,
+    "neighborhoods": [
+      "Prospect Park",
+      "Campus"
+    ],
+    "type": "Food court",
+    "food": "Yes",
+    "wifi": "",
+    "beverages": "",
+    "bikeRacks": "",
+    "parking": "Free + on-site",
+    "parkingTags": [
+      "Free",
+      "On-site"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "Opens at 11a on weekdays",
+    "vibe": "",
+    "space": "Plenty",
+    "noise": "",
+    "price": "Expensive",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Mall of America",
+    "address": "60 E Broadway, Bloomington, MN 55425",
+    "lat": 44.8548651,
+    "lng": -93.2422148,
+    "neighborhoods": [
+      "Bloomington"
+    ],
+    "type": "Food court",
+    "food": "Yes",
+    "wifi": "",
+    "beverages": "",
+    "bikeRacks": "",
+    "parking": "Free + on-site",
+    "parkingTags": [
+      "Free",
+      "On-site"
+    ],
+    "outdoorSeating": "No",
+    "hours": "10a-9p on weekdays",
+    "vibe": "Unhinged",
+    "space": "Plenty",
+    "noise": "Loud",
+    "price": "Cheap",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Minneapolis Central Library",
+    "address": "300 Nicollet Mall, Minneapolis, MN 55401",
+    "lat": 44.980606,
+    "lng": -93.2699584,
+    "neighborhoods": [
+      "Downtown"
+    ],
+    "type": "Library",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "Untested",
+    "bikeRacks": "Yes",
+    "parking": "Expensive + on-site + EV charging",
+    "parkingTags": [
+      "Expensive",
+      "On-site",
+      "EV charging"
+    ],
+    "outdoorSeating": "No",
+    "hours": "9a-8p MTuWTh, 9a-5p F",
+    "vibe": "Smelly",
+    "space": "Plenty",
+    "noise": "Quiet",
+    "price": "Free",
+    "ratingText": "2 stars out of 5",
+    "ratingNum": 2,
+    "notes": "Probably worth trying the seating next to the stacks."
+  },
+  {
+    "name": "Mosaic Coffee",
+    "address": "3040 Hennepin Ave, Minneapolis, MN 55408",
+    "lat": 44.9536,
+    "lng": -93.2998,
+    "neighborhoods": [
+      "Uptown",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "Decent",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "No",
+    "hours": "8a-3p MThF, closed TuW",
+    "vibe": "Tight",
+    "space": "Limited",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": "Monika Czinano's favorite spot!"
+  },
+  {
+    "name": "Nokomis Library",
+    "address": "5100 S 34th Ave, Minneapolis, MN 55417",
+    "lat": 44.910659,
+    "lng": -93.2231765,
+    "neighborhoods": [
+      "Nokomis",
+      "Southeast",
+      "South Minneapolis"
+    ],
+    "type": "Library",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "N/A",
+    "bikeRacks": "Yes",
+    "parking": "Free + on-site",
+    "parkingTags": [
+      "Free",
+      "On-site"
+    ],
+    "outdoorSeating": "No",
+    "hours": "12p-8p on MTh, 9a-5p on TuWF",
+    "vibe": "Millennial",
+    "space": "Medium",
+    "noise": "Quiet",
+    "price": "Free",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": ""
+  },
+  {
+    "name": "Northern Coffeeworks",
+    "address": "4208 S 28th Ave, Minneapolis, MN 55406",
+    "lat": 44.9265259,
+    "lng": -93.2324979,
+    "neighborhoods": [
+      "Nokomis",
+      "Southeast",
+      "South Minneapolis"
+    ],
+    "type": "Cafe",
+    "food": "Limited",
+    "wifi": "Yes",
+    "beverages": "Good",
+    "bikeRacks": "",
+    "parking": "Free + close",
+    "parkingTags": [
+      "Free",
+      "Close"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "7a-4p",
+    "vibe": "Northerly",
+    "space": "Plenty",
+    "noise": "Low",
+    "price": "Cheap",
+    "ratingText": "4 stars out of 5",
+    "ratingNum": 4,
+    "notes": "One downside: uncomfortable seats."
+  },
+  {
+    "name": "Red Coral Coffee",
+    "address": "4457 42nd Ave S, Minneapolis, MN 55406",
+    "lat": 44.9217398,
+    "lng": -93.2124563,
+    "neighborhoods": [
+      "Minnehaha",
+      "Hiawatha",
+      "South Minneapolis",
+      "Southeast"
+    ],
+    "type": "Cafe",
+    "food": "Only on Fridays",
+    "wifi": "",
+    "beverages": "",
+    "bikeRacks": "",
+    "parking": "Free + close",
+    "parkingTags": [
+      "Free",
+      "Close"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "Closed Mondays; 8a-3p the rest of the week",
+    "vibe": "Okome House",
+    "space": "Limited",
+    "noise": "",
+    "price": "",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Rise Bagel Co.",
+    "address": "530 N 3rd St, Minneapolis, MN 55401",
+    "lat": 44.9861763,
+    "lng": -93.2765553,
+    "neighborhoods": [
+      "North Loop"
+    ],
+    "type": "Restaurant + cafe",
+    "food": "Yes",
+    "wifi": "Yes",
+    "beverages": "Untested",
+    "bikeRacks": "",
+    "parking": "Difficult + expensive",
+    "parkingTags": [
+      "Difficult",
+      "Expensive"
+    ],
+    "outdoorSeating": "No",
+    "hours": "Closed Mondays; 7a-1p the rest of the week",
+    "vibe": "North Loop",
+    "space": "Medium",
+    "noise": "Low",
+    "price": "Medium",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": ""
+  },
+  {
+    "name": "Sencha Grand",
+    "address": "1692 Grand Ave, St Paul, MN 55105",
+    "lat": 44.9399149,
+    "lng": -93.1720489,
+    "neighborhoods": [
+      "St. Paul"
+    ],
+    "type": "Cafe",
+    "food": "No",
+    "wifi": "",
+    "beverages": "Decent",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "No",
+    "hours": "10a-10p",
+    "vibe": "Flimsy",
+    "space": "Medium",
+    "noise": "Low",
+    "price": "Medium",
+    "ratingText": "2 stars out of 5",
+    "ratingNum": 2,
+    "notes": ""
+  },
+  {
+    "name": "Silverbird Coffee",
+    "address": "4237 Nicollet Ave, Minneapolis, MN 55409",
+    "lat": 44.9256786,
+    "lng": -93.2776767,
+    "neighborhoods": [
+      "Kingfield",
+      "Uptownish",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "Some",
+    "wifi": "Yes",
+    "beverages": "Good",
+    "bikeRacks": "Yes",
+    "parking": "Free + close",
+    "parkingTags": [
+      "Free",
+      "Close"
+    ],
+    "outdoorSeating": "No",
+    "hours": "7a-6p",
+    "vibe": "Perfect",
+    "space": "Plenty",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "5 stars out of 5",
+    "ratingNum": 5,
+    "notes": ""
+  },
+  {
+    "name": "Sovereign Grounds",
+    "address": "813 E 48th St, Minneapolis, MN 55417",
+    "lat": 44.9159592,
+    "lng": -93.2620761,
+    "neighborhoods": [
+      "Southeast",
+      "South Minneapolis"
+    ],
+    "type": "Cafe",
+    "food": "",
+    "wifi": "Yes",
+    "beverages": "Good",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "",
+    "hours": "6:30a-6p",
+    "vibe": "Bubbly",
+    "space": "Limited",
+    "noise": "Medium",
+    "price": "Cheap",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": ""
+  },
+  {
+    "name": "Spyhouse Emery",
+    "address": "215 S 4th St, Minneapolis, MN 55401",
+    "lat": 44.9782902,
+    "lng": -93.2672042,
+    "neighborhoods": [
+      "Downtown"
+    ],
+    "type": "Cafe",
+    "food": "Yes",
+    "wifi": "Yes",
+    "beverages": "Good",
+    "bikeRacks": "Not immediately nearby",
+    "parking": "Difficult + expensive",
+    "parkingTags": [
+      "Difficult",
+      "Expensive"
+    ],
+    "outdoorSeating": "No",
+    "hours": "6:30a-5p",
+    "vibe": "Elegant",
+    "space": "Plenty",
+    "noise": "Medium",
+    "price": "Expensive",
+    "ratingText": "5 stars out of 5",
+    "ratingNum": 5,
+    "notes": ""
+  },
+  {
+    "name": "Spyhouse Hennepin",
+    "address": "2404 Hennepin Ave, Minneapolis, MN 55405",
+    "lat": 44.9596,
+    "lng": -93.2965,
+    "neighborhoods": [
+      "Uptown",
+      "Wedge",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "Some",
+    "wifi": "Yes",
+    "beverages": "Good",
+    "bikeRacks": "",
+    "parking": "Difficult",
+    "parkingTags": [
+      "Difficult"
+    ],
+    "outdoorSeating": "No",
+    "hours": "7a-6p",
+    "vibe": "Moody",
+    "space": "Medium",
+    "noise": "Low",
+    "price": "Medium",
+    "ratingText": "5 stars out of 5",
+    "ratingNum": 5,
+    "notes": ""
+  },
+  {
+    "name": "Spyhouse St. Paul",
+    "address": "420 Snelling Ave S, St Paul, MN 55105",
+    "lat": 44.9289351,
+    "lng": -93.1667473,
+    "neighborhoods": [
+      "St. Paul"
+    ],
+    "type": "Cafe",
+    "food": "Some",
+    "wifi": "Yes",
+    "beverages": "Good",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "",
+    "hours": "7a-6p",
+    "vibe": "Lidia",
+    "space": "Medium",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "4 stars out of 5",
+    "ratingNum": 4,
+    "notes": ""
+  },
+  {
+    "name": "Spyhouse Whittier",
+    "address": "2451 Nicollet Ave, Minneapolis, MN 55404",
+    "lat": 44.9574423,
+    "lng": -93.277698,
+    "neighborhoods": [
+      "Uptown",
+      "Whittier",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "Some",
+    "wifi": "Yes",
+    "beverages": "Good",
+    "bikeRacks": "",
+    "parking": "Difficult",
+    "parkingTags": [
+      "Difficult"
+    ],
+    "outdoorSeating": "No",
+    "hours": "7a-6p",
+    "vibe": "Bookish",
+    "space": "Medium",
+    "noise": "Low",
+    "price": "Medium",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": "Might be better suited to passion projects than work time."
+  },
+  {
+    "name": "St. Paul Bagelry Nicollet",
+    "address": "5426 Nicollet Ave, Minneapolis, MN 55419",
+    "lat": 44.9047095,
+    "lng": -93.2785218,
+    "neighborhoods": [
+      "Tangletown",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Restaurant + cafe",
+    "food": "Yes",
+    "wifi": "",
+    "beverages": "Untested",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "No",
+    "hours": "6a-2p",
+    "vibe": "Young",
+    "space": "Medium",
+    "noise": "Medium",
+    "price": "Medium",
+    "ratingText": "2 stars out of 5",
+    "ratingNum": 2,
+    "notes": ""
+  },
+  {
+    "name": "Turtle Bread Chicago",
+    "address": "4762 Chicago Ave, Minneapolis, MN 55407",
+    "lat": 44.9163017,
+    "lng": -93.26304619999999,
+    "neighborhoods": [
+      "Southeast",
+      "South Minneapolis"
+    ],
+    "type": "Restaurant + cafe",
+    "food": "Yes",
+    "wifi": "Yes",
+    "beverages": "",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "No",
+    "hours": "7a-8p",
+    "vibe": "Old",
+    "space": "Plenty",
+    "noise": "Loud",
+    "price": "Expensive",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": ""
+  },
+  {
+    "name": "Uncommon Grounds",
+    "address": "2809 Hennepin Ave, Minneapolis, MN 55408",
+    "lat": 44.9515397,
+    "lng": -93.2979682,
+    "neighborhoods": [
+      "Uptown",
+      "Wedge",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "No",
+    "wifi": "",
+    "beverages": "Good",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "10a-9p",
+    "vibe": "Ghostly",
+    "space": "Medium",
+    "noise": "Quiet",
+    "price": "Cheap",
+    "ratingText": "2 stars out of 5",
+    "ratingNum": 2,
+    "notes": ""
+  },
+  {
+    "name": "Venn Brewing Company",
+    "address": "3550 E 46th St Ste 140, Minneapolis, MN 55406",
+    "lat": 44.9200417,
+    "lng": -93.219844,
+    "neighborhoods": [
+      "Minnehaha",
+      "Hiawatha",
+      "South Minneapolis",
+      "Southeast"
+    ],
+    "type": "Brewery + cafe",
+    "food": "Limited",
+    "wifi": "",
+    "beverages": "Limited",
+    "bikeRacks": "Yes",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "3p-10p on M, 8a-10p other days",
+    "vibe": "Chill",
+    "space": "Plenty",
+    "noise": "",
+    "price": "Cheap",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "Washburn Library",
+    "address": "5244 Lyndale Ave S, Minneapolis, MN 55419",
+    "lat": 44.9073688,
+    "lng": -93.28878139999999,
+    "neighborhoods": [
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Library",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "N/A",
+    "bikeRacks": "",
+    "parking": "Free + on-site",
+    "parkingTags": [
+      "Free",
+      "On-site"
+    ],
+    "outdoorSeating": "No",
+    "hours": "9a-5p MWF, 12p-8p TuTh",
+    "vibe": "Leafy",
+    "space": "Plenty",
+    "noise": "Quiet",
+    "price": "Free",
+    "ratingText": "4 stars out of 5",
+    "ratingNum": 4,
+    "notes": ""
+  },
+  {
+    "name": "Wildflyer Coffee",
+    "address": "3262 Minnehaha Ave, Minneapolis, MN 55406",
+    "lat": 44.9430824,
+    "lng": -93.2307763,
+    "neighborhoods": [
+      "Hiawatha",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Cafe",
+    "food": "",
+    "wifi": "",
+    "beverages": "",
+    "bikeRacks": "",
+    "parking": "",
+    "parkingTags": [],
+    "outdoorSeating": "Yes",
+    "hours": "7a-6p",
+    "vibe": "",
+    "space": "",
+    "noise": "",
+    "price": "",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": ""
+  },
+  {
+    "name": "World Street Kitchen",
+    "address": "2743 Lyndale Ave S, Minneapolis, MN 55408",
+    "lat": 44.9525511,
+    "lng": -93.2878528,
+    "neighborhoods": [
+      "Uptown",
+      "Whittier",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Restaurant",
+    "food": "Yes",
+    "wifi": "",
+    "beverages": "None",
+    "bikeRacks": "",
+    "parking": "Free",
+    "parkingTags": [
+      "Free"
+    ],
+    "outdoorSeating": "Yes",
+    "hours": "11a-10p",
+    "vibe": "",
+    "space": "Plenty",
+    "noise": "Loud",
+    "price": "Expensive",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": ""
+  }
+];
+
+const state = {
+  q: '',
+  type: new Set(),
+  neighborhood: new Set(),
+  price: new Set(),
+  noise: new Set(),
+  space: new Set(),
+  amenities: new Set(),
+  hours: new Set(),
+  rating: new Set(),
+  presets: new Set(),
+  sort: 'name'
+};
+
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DAY_FULL_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+// Matches a token made up entirely of day-letter codes (M, Tu, W, Th, F, plus
+// Sa/Su), e.g. "MWF", "TuTh", "MTuWTh" — used to tell those apart from
+// already-spelled-out day names like "Mondays".
+const DAY_LETTER_RE = /^(?:Su|Sa|Th|Tu|M|W|F)+$/;
+
+function parseTimeToken(tok){
+  if (/midnight/i.test(tok)) return 24;
+  const m = tok.match(/(\d{1,2})(?::(\d{2}))?\s*(a|p)/i);
+  if(!m) return null;
+  let h = parseInt(m[1], 10);
+  const mins = m[2] ? parseInt(m[2], 10) / 60 : 0;
+  const ap = m[3].toLowerCase();
+  if (ap === 'p' && h !== 12) h += 12;
+  if (ap === 'a' && h === 12) h = 0;
+  return h + mins;
+}
+
+function tokenizeDayLetters(tok){
+  const map = { Su:0, Sa:6, Th:4, Tu:2, M:1, W:3, F:5 };
+  const days = [];
+  const re = /Su|Sa|Th|Tu|M|W|F/g;
+  let m;
+  while ((m = re.exec(tok))) days.push(map[m[0]]);
+  return days;
+}
+
+function dayNameToIndex(word){
+  const w = word.toLowerCase().slice(0,3);
+  const map = { sun:0, mon:1, tue:2, wed:3, thu:4, fri:5, sat:6 };
+  return map[w] ?? null;
+}
+
+// Parses free-text hours into a 7-slot schedule (Sun..Sat).
+// Each slot is null (unknown), {closed:true}, or {open,close} in 24h decimal hours.
+// Only asserts open/closed when the text actually says so — never guesses a missing time.
+function parseHours(str){
+  const schedule = new Array(7).fill(null);
+  if (!str) return schedule;
+  if (/24\s*\/\s*7/i.test(str)){
+    for (let i=0;i<7;i++) schedule[i] = { open:0, close:24 };
+    return schedule;
+  }
+
+  // Clauses can be comma- or semicolon-separated depending on the entry.
+  const clauses = str.split(/[,;]/).map(c => c.trim()).filter(Boolean);
+  const assigned = new Set();
+
+  // "Closed <Day...>" — either full day names ("Closed Mondays"/"Closed
+  // Tuesday") or day-letter codes ("closed TuW")
+  clauses.forEach(clause => {
+    const m = clause.match(/^closed\s+(.+)$/i);
+    if (m){
+      const rest = m[1].trim();
+      if (DAY_LETTER_RE.test(rest)){
+        tokenizeDayLetters(rest).forEach(idx => { schedule[idx] = { closed:true }; assigned.add(idx); });
+      } else {
+        (rest.match(/[A-Za-z]+/g) || []).forEach(w => {
+          const idx = dayNameToIndex(w);
+          if (idx !== null){ schedule[idx] = { closed:true }; assigned.add(idx); }
+        });
+      }
+    }
+  });
+
+  // "<time>-<time> on <dayletters>" or "<time>-<time> <dayletters>" (the
+  // "on" is optional — some entries include it, some don't)
+  clauses.forEach(clause => {
+    const m = clause.match(/^(\d{1,2}(?::\d{2})?\s*[ap])\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]|midnight)\s+(?:on\s+)?([A-Za-z]+)$/i);
+    if (m && DAY_LETTER_RE.test(m[3])){
+      const open = parseTimeToken(m[1]), close = parseTimeToken(m[2]);
+      tokenizeDayLetters(m[3]).forEach(idx => { schedule[idx] = { open, close }; assigned.add(idx); });
+    }
+  });
+
+  // "<time>-<time> [on] weekdays" — explicit weekday-only range (Mon-Fri)
+  clauses.forEach(clause => {
+    const m = clause.match(/^(\d{1,2}(?::\d{2})?\s*[ap])\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]|midnight)\s+(?:on\s+)?weekdays$/i);
+    if (m){
+      const open = parseTimeToken(m[1]), close = parseTimeToken(m[2]);
+      [1,2,3,4,5].forEach(i => { if (!assigned.has(i)){ schedule[i] = { open, close }; assigned.add(i); } });
+    }
+  });
+
+  // "Opens at <time> on weekdays" — open time only, weekday-scoped, close unknown
+  clauses.forEach(clause => {
+    const m = clause.match(/^opens at\s+(\d{1,2}(?::\d{2})?\s*[ap]|midnight)\s+on\s+weekdays$/i);
+    if (m){
+      const open = parseTimeToken(m[1]);
+      [1,2,3,4,5].forEach(i => { if (!assigned.has(i)){ schedule[i] = { open, close:null }; assigned.add(i); } });
+    }
+  });
+
+  // "(open )?<time>-<time> all other weekdays" — fills only the remaining
+  // unassigned weekdays (unlike "other days"/"the rest of the week" below,
+  // this never touches the weekend)
+  clauses.forEach(clause => {
+    const m = clause.match(/^(?:open\s+)?(\d{1,2}(?::\d{2})?\s*[ap])\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]|midnight)\s+all other weekdays$/i);
+    if (m){
+      const open = parseTimeToken(m[1]), close = parseTimeToken(m[2]);
+      [1,2,3,4,5].forEach(i => { if (!assigned.has(i)){ schedule[i] = { open, close }; assigned.add(i); } });
+    }
+  });
+
+  // "<time>-<time> other days" / "<time>-<time> the rest of the week"
+  clauses.forEach(clause => {
+    const m = clause.match(/(\d{1,2}(?::\d{2})?\s*[ap])\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]|midnight)\s+(other days|the rest of the week)/i);
+    if (m){
+      const open = parseTimeToken(m[1]), close = parseTimeToken(m[2]);
+      for (let i=0;i<7;i++) if (!assigned.has(i)){ schedule[i] = { open, close }; assigned.add(i); }
+    }
+  });
+
+  // "closes at <time> all other days" — close time only, opening time not stated so left unknown
+  clauses.forEach(clause => {
+    const m = clause.match(/closes at\s+(\d{1,2}(?::\d{2})?\s*[ap]|midnight)\s+all other days/i);
+    if (m){
+      const close = parseTimeToken(m[1]);
+      for (let i=0;i<7;i++) if (!assigned.has(i)){ schedule[i] = { open:null, close }; assigned.add(i); }
+    }
+  });
+
+  // A single plain "<time>-<time>" clause with no day info at all -> means
+  // weekdays (Mon-Fri) per house convention; weekend hours stay unknown
+  if (clauses.length === 1){
+    const m = clauses[0].match(/^(\d{1,2}(?::\d{2})?\s*[ap])\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]|midnight)$/i);
+    if (m){
+      const open = parseTimeToken(m[1]), close = parseTimeToken(m[2]);
+      [1,2,3,4,5].forEach(i => { schedule[i] = { open, close }; });
+    }
+  }
+
+  return schedule;
+}
+
+// Reuses the same clause-by-clause matching as parseHours() to render the
+// hours text with day-letter codes spelled out in full, and to append
+// "on weekdays" to a bare time range that carries no day information.
+function formatHoursDisplay(str){
+  if (!str) return '';
+  if (/24\s*\/\s*7/i.test(str)) return str;
+
+  const clauses = str.split(/[,;]/).map(c => c.trim()).filter(Boolean);
+
+  const formatted = clauses.map(clause => {
+    let m = clause.match(/^closed\s+(.+)$/i);
+    if (m){
+      const rest = m[1].trim();
+      return DAY_LETTER_RE.test(rest) ? `closed ${expandDayLetters(rest)}` : clause;
+    }
+
+    m = clause.match(/^(\d{1,2}(?::\d{2})?\s*[ap])\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]|midnight)\s+(?:on\s+)?([A-Za-z]+)$/i);
+    if (m && DAY_LETTER_RE.test(m[3])){
+      return `${m[1]}-${m[2]} on ${expandDayLetters(m[3])}`;
+    }
+
+    if (/other days|the rest of the week|closes at/i.test(clause)) return clause;
+
+    m = clause.match(/^(\d{1,2}(?::\d{2})?\s*[ap])\s*-\s*(\d{1,2}(?::\d{2})?\s*[ap]|midnight)$/i);
+    if (m && clauses.length === 1) return `${m[1]}-${m[2]} on weekdays`;
+
+    return clause;
+  });
+
+  return formatted.join('; ');
+}
+
+function expandDayLetters(token){
+  return tokenizeDayLetters(token).map(idx => DAY_FULL_NAMES[idx]).join(', ');
+}
+
+// Returns true/false when we can tell, or null when hours are missing/not specific enough to know.
+function isOpenNow(place){
+  if (!place.hours) return null;
+  const schedule = parseHours(place.hours);
+  const now = new Date();
+  const entry = schedule[now.getDay()];
+  if (!entry) return null;
+  if (entry.closed) return false;
+  if (entry.open == null || entry.close == null) return null;
+  const h = now.getHours() + now.getMinutes() / 60;
+  if (entry.close === 24) return h >= entry.open;
+  return h >= entry.open && h < entry.close;
+}
+
+const PRICE_ORDER = { 'Free':0, 'Cheap':1, 'Medium':2, 'Expensive':3 };
+
+function uniqueSorted(values){
+  return [...new Set(values.filter(Boolean))].sort();
+}
+
+// Splits a compound type like "Restaurant + cafe" into ["Restaurant","Cafe"]
+// so a place tagged that way is filterable/searchable under each half.
+function typeTags(place){
+  return place.type
+    .split('+')
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(s => s.charAt(0).toUpperCase() + s.slice(1));
+}
+
+function buildFilterOptions(){
+  const types = uniqueSorted(DATA.flatMap(d => typeTags(d)));
+  const neighborhoods = uniqueSorted(DATA.flatMap(d => d.neighborhoods));
+  const prices = ['Free','Cheap','Medium','Expensive'].filter(p => DATA.some(d => d.price === p));
+  const noises = ['Quiet','Low','Medium','Loud'].filter(n => DATA.some(d => d.noise === n));
+  const spaces = ['Limited','Medium','Plenty'].filter(s => DATA.some(d => d.space === s));
+
+  renderChipGroup('filterType', types, state.type);
+  renderChipGroup('filterNeighborhood', neighborhoods, state.neighborhood);
+  renderChipGroup('filterPrice', prices, state.price);
+  renderChipGroup('filterNoise', noises, state.noise);
+  renderChipGroup('filterSpace', spaces, state.space);
+  renderChipGroup('filterAmenities', ['Outdoor seating','Bike racks','WiFi noted','EV charging','Free + on-site'], state.amenities);
+  renderChipGroup('filterHours', ['Open now'], state.hours);
+  renderChipGroup('filterRating', ['3 stars', '4 stars', '5 stars'], state.rating);
+  renderChipGroup('filterPresets', ['I have calls', 'My favorites', 'Try something new'], state.presets);
+}
+
+function renderChipGroup(containerId, options, stateSet){
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  options.forEach(opt => {
+    const chip = document.createElement('button');
+    chip.className = 'chip';
+    chip.type = 'button';
+    chip.textContent = opt;
+    chip.addEventListener('click', () => {
+      if (stateSet.has(opt)) stateSet.delete(opt);
+      else stateSet.add(opt);
+      chip.classList.toggle('active');
+      render();
+    });
+    container.appendChild(chip);
+  });
+}
+
+// Shared by the "I have calls" and "Try something new" presets: WiFi is
+// either not noted or affirmatively good, seating isn't cramped, it isn't a
+// quiet-library kind of place, and it isn't a restaurant (including
+// "Restaurant + cafe" combos).
+function isCallFriendly(place){
+  if (place.wifi && !/yes/i.test(place.wifi)) return false;
+  if (place.space === 'Limited') return false;
+  if (place.noise === 'Quiet') return false;
+  if (typeTags(place).includes('Restaurant')) return false;
+  return true;
+}
+
+function matches(place){
+  const q = state.q.trim().toLowerCase();
+  if (q){
+    const hay = [
+      place.name, place.address, place.neighborhoods.join(' '), place.vibe, place.notes,
+      place.type, place.parking, place.ratingNum == null ? 'never been' : ''
+    ].join(' ').toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  if (state.type.size && !typeTags(place).some(t => state.type.has(t))) return false;
+  if (state.neighborhood.size && !place.neighborhoods.some(n => state.neighborhood.has(n))) return false;
+  if (state.price.size && !state.price.has(place.price)) return false;
+  if (state.noise.size && !state.noise.has(place.noise)) return false;
+  if (state.space.size && !state.space.has(place.space)) return false;
+
+  if (state.amenities.has('Outdoor seating') && place.outdoorSeating !== 'Yes') return false;
+  if (state.amenities.has('Bike racks') && place.bikeRacks !== 'Yes') return false;
+  if (state.amenities.has('WiFi noted') && !place.wifi) return false;
+  if (state.amenities.has('EV charging') && !place.parkingTags.includes('EV charging')) return false;
+  if (state.amenities.has('Free + on-site') && !(place.parkingTags.includes('Free') && place.parkingTags.includes('On-site'))) return false;
+
+  if (state.hours.has('Open now') && isOpenNow(place) !== true) return false;
+
+  if (state.rating.size){
+    const ratingMatch =
+      (state.rating.has('3 stars') && place.ratingNum === 3) ||
+      (state.rating.has('4 stars') && place.ratingNum === 4) ||
+      (state.rating.has('5 stars') && place.ratingNum === 5);
+    if (!ratingMatch) return false;
+  }
+
+  // "I have calls": WiFi is either not noted or affirmatively good, seating
+  // isn't cramped, it isn't a quiet-library kind of place, and it isn't a
+  // restaurant (including "Restaurant + cafe" combos).
+  if (state.presets.has('I have calls') && !isCallFriendly(place)) return false;
+
+  // "My favorites": 4- and 5-star spots only.
+  if (state.presets.has('My favorites')){
+    if (place.ratingNum == null || place.ratingNum < 4) return false;
+  }
+
+  // "Try something new": anywhere you haven't rated yet.
+  if (state.presets.has('Try something new') && place.ratingNum != null) return false;
+
+  return true;
+}
+
+function sortPlaces(list){
+  const arr = [...list];
+  if (state.sort === 'name'){
+    arr.sort((a,b) => a.name.localeCompare(b.name));
+  } else if (state.sort === 'rating'){
+    arr.sort((a,b) => (b.ratingNum ?? -1) - (a.ratingNum ?? -1));
+  } else if (state.sort === 'price'){
+    arr.sort((a,b) => (PRICE_ORDER[a.price] ?? 99) - (PRICE_ORDER[b.price] ?? 99));
+  }
+  return arr;
+}
+
+function esc(str){
+  const d = document.createElement('div');
+  d.textContent = str ?? '';
+  return d.innerHTML;
+}
+
+// Omit-blank-fields rule: any field with no data is left out of the
+// rendered card/popup entirely rather than shown with a placeholder
+// like "not noted" or "unrated".
+function stampHtml(place){
+  const parts = [];
+  if (place.ratingNum != null) parts.push(`<div class="stamp-rating">${esc(place.ratingNum + '★')}</div>`);
+  else parts.push(`<div class="stamp-rating">Never been</div>`);
+  if (place.vibe) parts.push(`<div class="stamp-vibe">"${esc(place.vibe)}"</div>`);
+  return parts.join('');
+}
+
+function factRow(label, value, extraClass){
+  if (!value || !value.trim()) return '';
+  return `<div class="${extraClass || ''}"><span>${esc(label)}:</span> <b>${esc(value)}</b></div>`;
+}
+
+function renderCard(place){
+  const neighTags = place.neighborhoods.map(n => `<span class="neigh-tag">${esc(n)}</span>`).join('');
+  const noiseClass = place.noise === 'Loud' ? 'loud' : '';
+
+  const openStatus = isOpenNow(place);
+  let statusHtml = '';
+  if (openStatus === true) statusHtml = '<span class="status-tag status-open">Open now</span>';
+  else if (openStatus === false) statusHtml = '<span class="status-tag status-closed">Closed now</span>';
+
+  // Bike racks fold into the parking pills — only shown when the answer is
+  // an unambiguous "Yes"; anything else (blank, "Not immediately nearby",
+  // etc.) stays invisible rather than getting its own fact row.
+  const parkingDisplayTags = [...place.parkingTags];
+  if (place.bikeRacks === 'Yes') parkingDisplayTags.push('Bike racks');
+
+  const parkingTagsHtml = parkingDisplayTags.length
+    ? parkingDisplayTags.map(t => `<span class="neigh-tag${t === 'Difficult' ? ' tag-loud' : ''}">${esc(t)}</span>`).join('')
+    : '';
+
+  const priceTagHtml = place.price ? `<span class="neigh-tag">${esc(place.price)}</span>` : '';
+
+  const factsHtml = [
+    factRow('Food', place.food),
+    factRow('WiFi', place.wifi),
+    factRow('Drinks', place.beverages),
+    factRow('Outdoor', place.outdoorSeating),
+    factRow('Space', place.space),
+    factRow('Noise', place.noise, noiseClass)
+  ].join('');
+
+  const priceBlock = priceTagHtml
+    ? `<div><span class="filter-label" style="margin:0;">Price</span><div class="neigh-tags">${priceTagHtml}</div></div>`
+    : '';
+  const parkingBlock = parkingTagsHtml
+    ? `<div><span class="filter-label" style="margin:0;">Parking</span><div class="neigh-tags">${parkingTagsHtml}</div></div>`
+    : '';
+  const tierRowHtml = (priceBlock || parkingBlock)
+    ? `<div class="tier-row">${priceBlock}${parkingBlock}</div>`
+    : '';
+
+  const stampContent = stampHtml(place);
+
+  return `
+  <div class="card">
+    <div class="card-head">
+      <div class="title-block">
+        <div class="card-type">${esc(place.type)}</div>
+        <h3>${esc(place.name)}</h3>
+        <p class="address">${esc(place.address)}</p>
+      </div>
+      ${stampContent ? `<div class="stamp">${stampContent}</div>` : ''}
+    </div>
+    <div class="neigh-tags">${neighTags}</div>
+    ${place.hours ? `<div class="hours-line">${esc(formatHoursDisplay(place.hours))} ${statusHtml}</div>` : ''}
+    ${factsHtml ? `<div class="facts">${factsHtml}</div>` : ''}
+    ${tierRowHtml}
+    ${place.notes ? `<div class="notes">${esc(place.notes)}</div>` : ''}
+  </div>`;
+}
+
+function render(){
+  const filtered = sortPlaces(DATA.filter(matches));
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('emptyState');
+
+  grid.innerHTML = filtered.map(renderCard).join('');
+  empty.style.display = filtered.length ? 'none' : 'block';
+
+  document.getElementById('resultsLine').textContent = `Showing ${filtered.length} of ${DATA.length}`;
+
+  updateMap(filtered);
+}
+
+let map, markerLayer;
+
+function initMap(){
+  map = L.map('map', { scrollWheelZoom:false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom:19,
+    attribution:'&copy; OpenStreetMap contributors'
+  }).addTo(map);
+  markerLayer = L.layerGroup().addTo(map);
+  map.setView([44.96, -93.24], 11);
+}
+
+function updateMap(places){
+  if (!map) return;
+  markerLayer.clearLayers();
+  const pts = [];
+  places.forEach(place => {
+    if (place.lat == null || place.lng == null) return;
+    const marker = L.circleMarker([place.lat, place.lng], {
+      radius:7,
+      color:'#2f4b3c',
+      weight:2,
+      fillColor:'#a8611f',
+      fillOpacity:0.85
+    });
+    const popupTagsHtml = [
+      place.type ? `<span class="neigh-tag">${esc(place.type)}</span>` : '',
+      place.price ? `<span class="neigh-tag">${esc(place.price)}</span>` : '',
+      place.ratingNum != null ? `<span class="neigh-tag">${esc(place.ratingNum + '★')}</span>` : '<span class="neigh-tag">Never been</span>'
+    ].join('');
+    marker.bindPopup(`
+      <p class="map-popup-name">${esc(place.name)}</p>
+      <p class="map-popup-address">${esc(place.address)}</p>
+      ${popupTagsHtml ? `<div class="map-popup-tags">${popupTagsHtml}</div>` : ''}
+    `);
+    marker.addTo(markerLayer);
+    pts.push([place.lat, place.lng]);
+  });
+  if (pts.length){
+    map.fitBounds(pts, { padding:[24,24], maxZoom:14 });
+  }
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  state.q = e.target.value;
+  render();
+});
+
+document.getElementById('sort').addEventListener('change', (e) => {
+  state.sort = e.target.value;
+  render();
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  state.q = '';
+  document.getElementById('searchInput').value = '';
+  ['type','neighborhood','price','noise','space','amenities','hours','rating','presets'].forEach(k => state[k].clear());
+  document.querySelectorAll('.chip.active').forEach(c => c.classList.remove('active'));
+  render();
+});
+
+document.getElementById('countBadge').textContent = `${DATA.length} spots logged`;
+document.getElementById('totalCount').textContent = `${DATA.length} total`;
+
+buildFilterOptions();
+initMap();
+render();
+</script>
+</body>
+</html>
