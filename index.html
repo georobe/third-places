@@ -293,6 +293,11 @@
     font-style:italic;
     font-size:10.5px;
     line-height:1.35;
+  }
+  .stamp-vibe.solo{
+    margin-top:0;
+    padding-top:0;
+    border-top:none;
     white-space:normal;
   }
 
@@ -1230,7 +1235,7 @@ const DATA = [
     "hours": "12p-8p on MTh, 9a-5p on TuWF",
     "vibe": "Millennial",
     "space": "Medium",
-    "noise": "Quiet",
+    "noise": "Low",
     "price": "Free",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
@@ -1859,7 +1864,7 @@ const DATA = [
     "hours": "12p-8p MW, 9a-5p TuThF",
     "vibe": "Uninspiring",
     "space": "Medium",
-    "noise": "Low",
+    "noise": "Quiet",
     "price": "Free",
     "ratingText": "2 stars out of 5",
     "ratingNum": 2,
@@ -1888,7 +1893,7 @@ const DATA = [
     "hours": "8a-8p MTuWTh, 8a-6p F",
     "vibe": "Grand",
     "space": "Plenty",
-    "noise": "Low",
+    "noise": "Quiet",
     "price": "Free",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
@@ -1917,7 +1922,7 @@ const DATA = [
     "hours": "8a-8p MTuWTh, 8a-6p F",
     "vibe": "Efficient",
     "space": "Plenty",
-    "noise": "Low",
+    "noise": "Quiet",
     "price": "Free",
     "ratingText": "4 stars out of 5",
     "ratingNum": 4,
@@ -2303,11 +2308,18 @@ function esc(str){
 // Omit-blank-fields rule: any field with no data is left out of the
 // rendered card/popup entirely rather than shown with a placeholder
 // like "not noted" or "unrated".
+// Unrated spots get no rating line on the stamp at all — "never been" stays
+// usable as a filter (the "Try something new" preset, and typing it into
+// search) without being spelled out on every unrated card.
 function stampHtml(place){
   const parts = [];
   if (place.ratingNum != null) parts.push(`<div class="stamp-rating">${esc(place.ratingNum + '★')}</div>`);
-  else parts.push(`<div class="stamp-rating">Never been</div>`);
-  if (place.vibe) parts.push(`<div class="stamp-vibe">"${esc(place.vibe)}"</div>`);
+  if (place.vibe){
+    // Without a rating line above it, the vibe quote shouldn't carry the
+    // divider that normally separates it from that line.
+    const vibeClass = place.ratingNum != null ? 'stamp-vibe' : 'stamp-vibe solo';
+    parts.push(`<div class="${vibeClass}">"${esc(place.vibe)}"</div>`);
+  }
   return parts.join('');
 }
 
