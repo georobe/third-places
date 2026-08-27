@@ -369,6 +369,16 @@
   }
   .status-open{ background:var(--accent-soft); color:var(--accent); }
   .status-closed{ background:#f1e4de; color:var(--loud); }
+  .status-seasonal{ background:#e4e0d2; color:var(--ink-soft); }
+
+  .card.seasonal-closed{
+    filter:grayscale(0.9);
+    opacity:0.55;
+    transition:opacity 0.15s ease, filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card.seasonal-closed:hover{
+    opacity:0.85;
+  }
 
   .tier-row{
     display:grid;
@@ -486,6 +496,10 @@
         <div class="chip-row" id="filterNeighborhood"></div>
       </div>
       <div class="filter-group">
+        <span class="filter-label">Near</span>
+        <div class="chip-row" id="filterNear"></div>
+      </div>
+      <div class="filter-group">
         <span class="filter-label">Price</span>
         <div class="chip-row" id="filterPrice"></div>
       </div>
@@ -557,7 +571,8 @@ const DATA = [
     "price": "Free",
     "ratingText": "4 stars out of 5",
     "ratingNum": 4,
-    "notes": ""
+    "notes": "",
+    "near": "Campus"
   },
   {
     "name": "Arya",
@@ -587,7 +602,8 @@ const DATA = [
     "price": "Cheap",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Augsburg Park Library",
@@ -616,7 +632,8 @@ const DATA = [
     "price": "Free",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Bob's Java Hut",
@@ -646,7 +663,8 @@ const DATA = [
     "price": "Cheap",
     "ratingText": "4 stars out of 5",
     "ratingNum": 4,
-    "notes": "Tea served in such a way that it always makes a mess."
+    "notes": "Tea served in such a way that it always makes a mess.",
+    "near": "Home"
   },
   {
     "name": "Càphin Linden Hills",
@@ -677,7 +695,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": ""
+    "notes": "",
+    "near": "Haircut"
   },
   {
     "name": "Cheba Hut",
@@ -706,7 +725,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "2 stars out of 5",
     "ratingNum": 2,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Coco Downtown",
@@ -733,7 +753,8 @@ const DATA = [
     "price": "Free",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": "Gym on-site, perhaps bike storage too. Meeting pod rooms are quite cold. I don't know how to validate the parking."
+    "notes": "Gym on-site, perhaps bike storage too. Meeting pod rooms are quite cold. I don't know how to validate the parking.",
+    "near": "Piano"
   },
   {
     "name": "Dogwood East Lake",
@@ -764,7 +785,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "5 stars out of 5",
     "ratingNum": 5,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Duck Duck",
@@ -795,7 +817,8 @@ const DATA = [
     "price": "Cheap",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Due Focacceria",
@@ -822,7 +845,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Easy Day Cafe",
@@ -853,7 +877,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "2 stars out of 5",
     "ratingNum": 2,
-    "notes": "Food is good, but wifi often doesn't work."
+    "notes": "Food is good, but wifi often doesn't work.",
+    "near": "Therapy"
   },
   {
     "name": "Edina Library",
@@ -881,7 +906,8 @@ const DATA = [
     "price": "Free",
     "ratingText": "4 stars out of 5",
     "ratingNum": 4,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Falls Coffee",
@@ -911,7 +937,8 @@ const DATA = [
     "price": "Expensive",
     "ratingText": "2 stars out of 5",
     "ratingNum": 2,
-    "notes": "Same ISP as Lowa, so this is not a good option if the internet is out."
+    "notes": "Same ISP as Lowa, so this is not a good option if the internet is out.",
+    "near": ""
   },
   {
     "name": "Finnish Bistro",
@@ -936,7 +963,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "4 stars out of 5",
     "ratingNum": 4,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Five Watt Kingfield",
@@ -966,7 +994,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": "Therapy"
   },
   {
     "name": "Five Watt Lyndale",
@@ -997,7 +1026,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "2 stars out of 5",
     "ratingNum": 2,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Gigi's Cafe",
@@ -1026,7 +1056,8 @@ const DATA = [
     "price": "",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Linden Hills Library",
@@ -1053,7 +1084,8 @@ const DATA = [
     "price": "Free",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "It looks gorgeous!",
+    "near": ""
   },
   {
     "name": "Malcolm Yards",
@@ -1082,7 +1114,8 @@ const DATA = [
     "price": "Expensive",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": "Campus"
   },
   {
     "name": "Mall of America",
@@ -1110,7 +1143,8 @@ const DATA = [
     "price": "Cheap",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Minneapolis Central Library",
@@ -1137,9 +1171,10 @@ const DATA = [
     "space": "Plenty",
     "noise": "Quiet",
     "price": "Free",
-    "ratingText": "2 stars out of 5",
-    "ratingNum": 2,
-    "notes": "Probably worth trying the seating next to the stacks."
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": "Sit next to the stacks.",
+    "near": "Piano"
   },
   {
     "name": "Mosaic Coffee",
@@ -1168,7 +1203,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": "Monika Czinano's favorite spot!"
+    "notes": "Monika Czinano's favorite spot!",
+    "near": ""
   },
   {
     "name": "Nokomis Library",
@@ -1198,7 +1234,8 @@ const DATA = [
     "price": "Free",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Northern Coffeeworks",
@@ -1228,7 +1265,8 @@ const DATA = [
     "price": "Cheap",
     "ratingText": "4 stars out of 5",
     "ratingNum": 4,
-    "notes": "One downside: uncomfortable seats."
+    "notes": "One downside: uncomfortable seats.",
+    "near": ""
   },
   {
     "name": "Red Coral Coffee",
@@ -1259,7 +1297,8 @@ const DATA = [
     "price": "",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Rise Bagel Co.",
@@ -1287,7 +1326,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Sencha Grand",
@@ -1314,7 +1354,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "2 stars out of 5",
     "ratingNum": 2,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Silverbird Coffee",
@@ -1345,7 +1386,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "5 stars out of 5",
     "ratingNum": 5,
-    "notes": ""
+    "notes": "",
+    "near": "Therapy"
   },
   {
     "name": "Sovereign Grounds",
@@ -1365,7 +1407,7 @@ const DATA = [
     "parkingTags": [
       "Free"
     ],
-    "outdoorSeating": "",
+    "outdoorSeating": "Yes",
     "hours": "6:30a-6p",
     "vibe": "Bubbly",
     "space": "Limited",
@@ -1373,7 +1415,8 @@ const DATA = [
     "price": "Cheap",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Spyhouse Emery",
@@ -1401,7 +1444,8 @@ const DATA = [
     "price": "Expensive",
     "ratingText": "5 stars out of 5",
     "ratingNum": 5,
-    "notes": ""
+    "notes": "",
+    "near": "Piano"
   },
   {
     "name": "Spyhouse Hennepin",
@@ -1426,12 +1470,13 @@ const DATA = [
     "outdoorSeating": "No",
     "hours": "7a-6p",
     "vibe": "Moody",
-    "space": "Medium",
+    "space": "Plenty",
     "noise": "Low",
     "price": "Medium",
     "ratingText": "5 stars out of 5",
     "ratingNum": 5,
-    "notes": ""
+    "notes": "",
+    "near": "Home"
   },
   {
     "name": "Spyhouse St. Paul",
@@ -1452,13 +1497,14 @@ const DATA = [
     ],
     "outdoorSeating": "",
     "hours": "7a-6p",
-    "vibe": "Lidia",
+    "vibe": "Touristy",
     "space": "Medium",
     "noise": "Medium",
     "price": "Medium",
     "ratingText": "4 stars out of 5",
     "ratingNum": 4,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Spyhouse Whittier",
@@ -1488,7 +1534,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": "Might be better suited to passion projects than work time."
+    "notes": "Might be better suited to passion projects than work time.",
+    "near": ""
   },
   {
     "name": "St. Paul Bagelry Nicollet",
@@ -1517,7 +1564,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "2 stars out of 5",
     "ratingNum": 2,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Turtle Bread Chicago",
@@ -1545,7 +1593,8 @@ const DATA = [
     "price": "Expensive",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Uncommon Grounds",
@@ -1575,7 +1624,8 @@ const DATA = [
     "price": "Cheap",
     "ratingText": "2 stars out of 5",
     "ratingNum": 2,
-    "notes": ""
+    "notes": "",
+    "near": "Home"
   },
   {
     "name": "Venn Brewing Company",
@@ -1605,7 +1655,8 @@ const DATA = [
     "price": "Cheap",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Washburn Library",
@@ -1634,7 +1685,8 @@ const DATA = [
     "price": "Free",
     "ratingText": "4 stars out of 5",
     "ratingNum": 4,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Wildflyer Coffee",
@@ -1661,7 +1713,8 @@ const DATA = [
     "price": "",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": "Trylon"
   },
   {
     "name": "World Street Kitchen",
@@ -1691,7 +1744,8 @@ const DATA = [
     "price": "Expensive",
     "ratingText": "3 stars out of 5",
     "ratingNum": 3,
-    "notes": ""
+    "notes": "",
+    "near": ""
   },
   {
     "name": "Crema",
@@ -1721,7 +1775,8 @@ const DATA = [
     "price": "",
     "ratingText": "",
     "ratingNum": null,
-    "notes": "Small inside; probably only good for an hour or two of outdoor work."
+    "notes": "Small inside; probably only good for an hour or two of outdoor work.",
+    "near": ""
   },
   {
     "name": "Nokomis Beach Coffee",
@@ -1751,7 +1806,8 @@ const DATA = [
     "price": "Medium",
     "ratingText": "4 stars out of 5",
     "ratingNum": 4,
-    "notes": "Plenty of space outside."
+    "notes": "Plenty of space outside.",
+    "near": ""
   },
   {
     "name": "Quixotic Coffee",
@@ -1777,7 +1833,122 @@ const DATA = [
     "price": "",
     "ratingText": "",
     "ratingNum": null,
-    "notes": ""
+    "notes": "",
+    "near": ""
+  },
+  {
+    "name": "Walker Library",
+    "address": "2880 Hennepin Ave, Minneapolis, MN 55408",
+    "lat": 44.949598,
+    "lng": -93.298661,
+    "neighborhoods": [
+      "Uptown",
+      "South Minneapolis",
+      "Southwest"
+    ],
+    "type": "Library",
+    "food": "No",
+    "wifi": "Yes",
+    "beverages": "N/A",
+    "bikeRacks": "",
+    "parking": "Difficult",
+    "parkingTags": [
+      "Difficult"
+    ],
+    "outdoorSeating": "No",
+    "hours": "12p-8p MW, 9a-5p TuThF",
+    "vibe": "Uninspiring",
+    "space": "Medium",
+    "noise": "Low",
+    "price": "Free",
+    "ratingText": "2 stars out of 5",
+    "ratingNum": 2,
+    "notes": "",
+    "near": "Home"
+  },
+  {
+    "name": "Walter Library",
+    "address": "117 Pleasant St SE, Minneapolis, MN 55455",
+    "lat": 44.975289,
+    "lng": -93.236271,
+    "neighborhoods": [
+      "Campus"
+    ],
+    "type": "University library",
+    "food": "No",
+    "wifi": "",
+    "beverages": "N/A",
+    "bikeRacks": "Yes",
+    "parking": "Difficult + expensive",
+    "parkingTags": [
+      "Difficult",
+      "Expensive"
+    ],
+    "outdoorSeating": "",
+    "hours": "8a-8p MTuWTh, 8a-6p F",
+    "vibe": "Grand",
+    "space": "Plenty",
+    "noise": "Low",
+    "price": "Free",
+    "ratingText": "3 stars out of 5",
+    "ratingNum": 3,
+    "notes": "For deep productivity (and only if you can get in!); probably better for deep work on passion projects.",
+    "near": ""
+  },
+  {
+    "name": "O. Meredith Wilson Library",
+    "address": "309 S 19th Ave, Minneapolis, MN 55455",
+    "lat": 44.9709393249,
+    "lng": -93.2435872373,
+    "neighborhoods": [
+      "Campus"
+    ],
+    "type": "University library",
+    "food": "No",
+    "wifi": "",
+    "beverages": "N/A",
+    "bikeRacks": "Yes",
+    "parking": "Difficult + expensive",
+    "parkingTags": [
+      "Difficult",
+      "Expensive"
+    ],
+    "outdoorSeating": "",
+    "hours": "8a-8p MTuWTh, 8a-6p F",
+    "vibe": "Efficient",
+    "space": "Plenty",
+    "noise": "Low",
+    "price": "Free",
+    "ratingText": "4 stars out of 5",
+    "ratingNum": 4,
+    "notes": "Office-like; would be good for anything other than calls (if you can get in!).",
+    "near": ""
+  },
+  {
+    "name": "Centennial Lakes Park",
+    "address": "7499 France Ave S, Edina, MN 55435",
+    "lat": 44.8668775,
+    "lng": -93.3272869,
+    "neighborhoods": [
+      "Edina"
+    ],
+    "type": "Outdoors",
+    "food": "Nearby",
+    "wifi": "",
+    "beverages": "N/A",
+    "bikeRacks": "Yes",
+    "parking": "",
+    "parkingTags": [],
+    "outdoorSeating": "Exclusively",
+    "hours": "6a-10p",
+    "vibe": "Man-made",
+    "space": "",
+    "noise": "",
+    "price": "Free",
+    "ratingText": "",
+    "ratingNum": null,
+    "notes": "Food options include: Whole Foods.",
+    "near": "Dentist"
   }
 ];
 
@@ -1785,6 +1956,7 @@ const state = {
   q: '',
   type: new Set(),
   neighborhood: new Set(),
+  near: new Set(),
   price: new Set(),
   noise: new Set(),
   space: new Set(),
@@ -1981,6 +2153,21 @@ function isOpenNow(place){
   return h >= entry.open && h < entry.close;
 }
 
+// "Exclusively" outdoor spots (patios, parks) aren't really usable once
+// Minnesota winter sets in. December through the end of February, on the
+// visitor's local clock, is treated as that window.
+function isWinterSeason(date){
+  const d = date || new Date();
+  const month = d.getMonth(); // 0 = Jan
+  if (month === 11) return true;              // December
+  if (month === 0 || month === 1) return true; // January, February
+  return false;
+}
+
+function isWinterClosed(place){
+  return place.outdoorSeating === 'Exclusively' && isWinterSeason();
+}
+
 const PRICE_ORDER = { 'Free':0, 'Cheap':1, 'Medium':2, 'Expensive':3 };
 
 function uniqueSorted(values){
@@ -2000,12 +2187,14 @@ function typeTags(place){
 function buildFilterOptions(){
   const types = uniqueSorted(DATA.flatMap(d => typeTags(d)));
   const neighborhoods = uniqueSorted(DATA.flatMap(d => d.neighborhoods));
+  const nears = uniqueSorted(DATA.map(d => d.near));
   const prices = ['Free','Cheap','Medium','Expensive'].filter(p => DATA.some(d => d.price === p));
   const noises = ['Quiet','Low','Medium','Loud'].filter(n => DATA.some(d => d.noise === n));
   const spaces = ['Limited','Medium','Plenty'].filter(s => DATA.some(d => d.space === s));
 
   renderChipGroup('filterType', types, state.type);
   renderChipGroup('filterNeighborhood', neighborhoods, state.neighborhood);
+  renderChipGroup('filterNear', nears, state.near);
   renderChipGroup('filterPrice', prices, state.price);
   renderChipGroup('filterNoise', noises, state.noise);
   renderChipGroup('filterSpace', spaces, state.space);
@@ -2050,17 +2239,18 @@ function matches(place){
   if (q){
     const hay = [
       place.name, place.address, place.neighborhoods.join(' '), place.vibe, place.notes,
-      place.type, place.parking, place.ratingNum == null ? 'never been' : ''
+      place.type, place.parking, place.near, place.ratingNum == null ? 'never been' : ''
     ].join(' ').toLowerCase();
     if (!hay.includes(q)) return false;
   }
   if (state.type.size && !typeTags(place).some(t => state.type.has(t))) return false;
   if (state.neighborhood.size && !place.neighborhoods.some(n => state.neighborhood.has(n))) return false;
+  if (state.near.size && !state.near.has(place.near)) return false;
   if (state.price.size && !state.price.has(place.price)) return false;
   if (state.noise.size && !state.noise.has(place.noise)) return false;
   if (state.space.size && !state.space.has(place.space)) return false;
 
-  if (state.amenities.has('Outdoor seating') && place.outdoorSeating !== 'Yes') return false;
+  if (state.amenities.has('Outdoor seating') && !['Yes','Exclusively'].includes(place.outdoorSeating)) return false;
   if (state.amenities.has('Bike racks') && place.bikeRacks !== 'Yes') return false;
   if (state.amenities.has('WiFi noted') && !place.wifi) return false;
   if (state.amenities.has('EV charging') && !place.parkingTags.includes('EV charging')) return false;
@@ -2130,9 +2320,12 @@ function renderCard(place){
   const neighTags = place.neighborhoods.map(n => `<span class="neigh-tag">${esc(n)}</span>`).join('');
   const noiseClass = place.noise === 'Loud' ? 'loud' : '';
 
+  const winterClosed = isWinterClosed(place);
+
   const openStatus = isOpenNow(place);
   let statusHtml = '';
-  if (openStatus === true) statusHtml = '<span class="status-tag status-open">Open now</span>';
+  if (winterClosed) statusHtml = '<span class="status-tag status-seasonal">Outdoor seating only</span>';
+  else if (openStatus === true) statusHtml = '<span class="status-tag status-open">Open now</span>';
   else if (openStatus === false) statusHtml = '<span class="status-tag status-closed">Closed now</span>';
 
   // Bike racks fold into the parking pills — only shown when the answer is
@@ -2169,7 +2362,7 @@ function renderCard(place){
   const stampContent = stampHtml(place);
 
   return `
-  <div class="card">
+  <div class="card${winterClosed ? ' seasonal-closed' : ''}">
     <div class="card-head">
       <div class="title-block">
         <div class="card-type">${esc(place.type)}</div>
@@ -2179,7 +2372,7 @@ function renderCard(place){
       ${stampContent ? `<div class="stamp">${stampContent}</div>` : ''}
     </div>
     <div class="neigh-tags">${neighTags}</div>
-    ${place.hours ? `<div class="hours-line">${esc(formatHoursDisplay(place.hours))} ${statusHtml}</div>` : ''}
+    ${(place.hours || statusHtml) ? `<div class="hours-line">${place.hours ? esc(formatHoursDisplay(place.hours)) + ' ' : ''}${statusHtml}</div>` : ''}
     ${factsHtml ? `<div class="facts">${factsHtml}</div>` : ''}
     ${tierRowHtml}
     ${place.notes ? `<div class="notes">${esc(place.notes)}</div>` : ''}
@@ -2217,12 +2410,13 @@ function updateMap(places){
   const pts = [];
   places.forEach(place => {
     if (place.lat == null || place.lng == null) return;
+    const winterClosed = isWinterClosed(place);
     const marker = L.circleMarker([place.lat, place.lng], {
       radius:7,
-      color:'#2f4b3c',
+      color: winterClosed ? '#9a968a' : '#2f4b3c',
       weight:2,
-      fillColor:'#a8611f',
-      fillOpacity:0.85
+      fillColor: winterClosed ? '#c9c4b4' : '#a8611f',
+      fillOpacity: winterClosed ? 0.5 : 0.85
     });
     const popupTagsHtml = [
       place.type ? `<span class="neigh-tag">${esc(place.type)}</span>` : '',
@@ -2255,7 +2449,7 @@ document.getElementById('sort').addEventListener('change', (e) => {
 document.getElementById('clearBtn').addEventListener('click', () => {
   state.q = '';
   document.getElementById('searchInput').value = '';
-  ['type','neighborhood','price','noise','space','amenities','hours','rating','presets'].forEach(k => state[k].clear());
+  ['type','neighborhood','near','price','noise','space','amenities','hours','rating','presets'].forEach(k => state[k].clear());
   document.querySelectorAll('.chip.active').forEach(c => c.classList.remove('active'));
   render();
 });
